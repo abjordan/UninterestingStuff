@@ -85,7 +85,7 @@ def lifeIt(in_data, time):
     print time, "========"
     i = 0
     for line in lines:
-        print "%02dLINE:" % i, line
+        print "%02dLINE :" % i, line
         i += 1
     print time, "========"
     
@@ -100,7 +100,7 @@ def lifeIt(in_data, time):
     elif time == 1:
         board = lines
         width = len(board[0])
-        height = len(board) - 3
+        height = len(board) - 2
         real_board = [r.strip("#") for r in board[1:height]]
         theUniverse = []
         for b in real_board:
@@ -109,8 +109,10 @@ def lifeIt(in_data, time):
         
         after = runLife(theUniverse, gensToRun)
         str = formatBoard(after)
-        #for line in str.split("\n"):
-        #    print "AFTER:", line
+        i = 0
+        for line in str.split("\n"):
+            print "%02dAFTER:" % i, line
+            i += 1
         return str
     
 def netcat(hostname, port, content=None):
