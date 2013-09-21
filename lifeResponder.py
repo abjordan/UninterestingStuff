@@ -53,9 +53,22 @@ def runLife(nextUniverse, iterations):
         # printUniverse(universe)
         for a in range(0, len(universe)):
             for b in range(0, len(universe[a])):
-                if universe[a][b] == " " and countSurrounding(universe, a, b) == 3:
+                count = 0
+                surrounding = ((a - 1, b - 1),
+                       (a - 1, b    ),
+                       (a - 1, b + 1),
+                       (a    , b - 1),
+                       (a    , b + 1),
+                       (a + 1, b - 1),
+                       (a + 1, b    ),
+                       (a + 1, b + 1))
+                for x, y in surrounding:
+                    if not(x < 0 or y < 0 or x >= len(universe) or y >= len(universe[x])) and (universe[x][y] == "*"):
+                        count += 1
+                        
+                if universe[a][b] == " " and count == 3:
                     nextUniverse[a][b] = "*"
-                elif universe[a][b] == "*" and countSurrounding(universe, a, b) not in (2, 3):
+                elif universe[a][b] == "*" and (count != 2) and (count != 3):
                     nextUniverse[a][b] = " "
                 else:
                     nextUniverse[a][b] = universe[a][b]
@@ -82,12 +95,12 @@ def lifeIt(in_data, time):
     global board
     global params
     lines = in_data.split("\n")
-    print time, "========"
-    i = 0
-    for line in lines:
-        print "%02dLINE :" % i, line
-        i += 1
-    print time, "========"
+    #print time, "========"
+    #i = 0
+    #for line in lines:
+    #    print "%02dLINE :" % i, line
+    #    i += 1
+    #print time, "========"
     
     if time == 0:
         # This is the setup
@@ -109,28 +122,37 @@ def lifeIt(in_data, time):
         
         after = runLife(theUniverse, gensToRun)
         str = formatBoard(after)
-        i = 0
-        for line in str.split("\n"):
-            print "%02dAFTER:" % i, line
-            i += 1
+        #i = 0
+        #for line in str.split("\n"):
+        #    print "%02dAFTER:" % i, line
+        #    i += 1
         return str
     
 def netcat(hostname, port, content=None):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect((hostname, port))
     called = 0
+    won = False
     while 1:
         data = s.recv(4096)
         if data == "":
             break
-        #print "Received:", repr(data)
-        retn = lifeIt(data,called)
-        called += 1
+        # print "Received:", repr(data)
+        if "#####" not in data:
+            print "Received:", repr(data)
+            
+        if "Congratulations" in data:
+            won = True
         
-        if retn is not None:
-            print "SENDING"
-            # retn = "##### Round 2: 0 Generations #####\n" + retn
-            s.sendall(retn)
+        if not won:
+            retn = lifeIt(data,called)
+            called += 1 
+        
+            if retn is not None:
+                print "SENDING"
+                # retn = "##### Round 2: 0 Generations #####\n" + retn
+                s.sendall(retn)
+                called = 0
         
     print "Connection closed."
     s.close()
